@@ -1,6 +1,6 @@
-import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sp
 
 def es_separable(ecuacion):
     x, y = sp.symbols('x y')
@@ -77,10 +77,47 @@ def main():
         print("La ecuación es separable.")
         sol = resolver_ecuacion_simbolica(ecuacion)
         print("La solución es: ", sol)
+        # Pedimos los valores iniciales de x y y
+        x0 = float(input("Ingrese el valor inicial de x: "))
+        y0 = float(input("Ingrese el valor inicial de y: "))
+
+            # Definimos la solución particular
+        sol_particular = sp.Eq(sol, y)
+        soluciones = sp.solve(sol_particular, y)
+
+        if soluciones:
+            sol_particular = soluciones[0]
+
+            # Ajustamos la solución particular para que pase por el punto (x0, y0)
+            ajuste = sol_particular.subs(x, x0) - y0
+            sol_particular = sol_particular - ajuste
+
+            # Generamos la gráfica de la solución particular
+            x_valores = np.linspace(x0-10, x0+10, 10000)  # Aumentamos el número de puntos a 10000
+            y_valores = []
+            for x_valor in x_valores:
+                y_valor = sol_particular.subs(x, x_valor)
+                y_valores.append(y_valor)
+
+            # Utilizamos una función de interpolación para suavizar la gráfica
+            from scipy.interpolate import interp1d
+            f = interp1d(x_valores, y_valores , kind='cubic')
+            x_valores_suavizados = np.linspace(x0-10, x0+10, 1000)
+            y_valores_suavizados = f(x_valores_suavizados)
+
+            # Ajustamos la escala de la gráfica para que sea más similar a la de GeoGebra
+            plt.plot(x_valores_suavizados, y_valores_suavizados)
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.title('Gráfica de la solución particular')
+            plt.grid(True)
+            plt.xlim(x0-5, x0+5)  # Ajustamos el límite inferior y superior del eje x
+            plt.ylim(y0-2, y0+2)  # Ajustamos el límite inferior y superior del eje y
+            plt.show()
+        else:
+            print("No se encontró ninguna solución particular.")
     else:
         print("La ecuación no es separable.")
-        sol = resolver_ecuacion_simbolica(ecuacion)
-        print("La solución es: ", sol)
 
 if __name__ == "__main__":
     main()
