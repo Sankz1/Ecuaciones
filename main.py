@@ -19,7 +19,7 @@ def es_separable(ecuacion):
         factors = dx_dy.args
         for f in factors:
             if f.has(x) and not f.has(y):
-                f_x = f
+                f_x = f 
             elif f.has(y) and not f.has(x):
                 g_y = f
         if f_x and g_y:
@@ -62,44 +62,25 @@ def es_separable(ecuacion):
             return True
 
     return False
-def resolver_ecuacion(ecuacion, x0, y0, h, n):
-    x = np.zeros(n+1)
-    y = np.zeros(n+1)
-    x[0] = x0
-    y[0] = y0
 
-    for i in range(n):
-        k1 = eval(ecuacion.replace('x', str(x[i])).replace('y', str(y[i])))
-        k2 = eval(ecuacion.replace('x', str(x[i] + h*0.5)).replace('y', str(y[i] + h*k1*0.5)))
-        k3 = eval(ecuacion.replace('x', str(x[i] + h*0.5)).replace('y', str(y[i] + h*k2*0.5)))
-        k4 = eval(ecuacion.replace('x', str(x[i] + h)).replace('y', str(y[i] + h*k3)))
-
-        y[i+1] = y[i] + (h/6)*(k1 + (2*k2) + (2*k3) + k4)
-        x[i+1] = x[i] + h
-
-    return x, y
-def graficar_resultado(x, y):
-    plt.plot(x, y)
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title('Gráfica de la ecuación diferencial')
-    plt.grid(True)
-    plt.show()
+def resolver_ecuacion_simbolica(ecuacion):
+    x, y = sp.symbols('x y')
+    dx_dy = sp.sympify(ecuacion)
+    sol = sp.integrate(dx_dy, x)
+    return sol
 
 def main():
-    ecuacion = input("Ingrese la ecuación diferencial (y' = f(x, y)): ")
+    ecuacion = input("Ingrese la ecuación diferencial (dy/dx = f(x, y)): ")
+    x, y = sp.symbols('x y')
+    dx_dy = sp.sympify(ecuacion)
     if es_separable(ecuacion):
         print("La ecuación es separable.")
-        x0 = float(input("Ingrese el valor inicial de x: "))
-        y0 = float(input("Ingrese el valor inicial de y: "))
-        h = float(input("Ingrese el paso (h): "))
-        n = int(input("Ingrese el número de iteraciones (n): "))
-        x, y = resolver_ecuacion(ecuacion, x0, y0, h, n)
-        print("x =", x)
-        print("y =", y)
-        graficar_resultado(x, y)  # <--- Agregamos la llamada a la función graficar_resultado
+        sol = resolver_ecuacion_simbolica(ecuacion)
+        print("La solución es: ", sol)
     else:
         print("La ecuación no es separable.")
+        sol = resolver_ecuacion_simbolica(ecuacion)
+        print("La solución es: ", sol)
 
 if __name__ == "__main__":
     main()
